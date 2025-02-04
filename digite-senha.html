@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criptografia de Senha em JavaScript</title>
+    <meta name="description" content="Criptografia e descriptografia de senha">
+    <link rel="shortcut icon" href="/img/favicon.ico" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        #container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h3 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input[type="button"] {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        input[type="button"]:hover {
+            background-color: #0056b3;
+        }
+        #content-left {
+            float: left;
+            width: 160px;
+        }
+        #content-right {
+            float: right;
+            width: calc(100% - 180px);
+        }
+        .clear {
+            clear: both;
+        }
+        #footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            margin-top: 20px;
+        }
+        #footer a {
+            color: #007BFF;
+        }
+        #encryptedTest {
+            border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 50px;
+            background-color: #f9f9f9;
+            word-wrap: break-word;
+        }
+
+        /* Estilo do Pop-up */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 400px;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Criptografia de Senha em JavaScript</h1>
+
+        <div id="content-left">
+            <!-- Espaço reservado para menu lateral -->
+        </div>
+        <div id="content-right">
+            <form name="key" action="#" onsubmit="return false;">
+                <h3>Senha</h3>
+                <p align="center">
+                    <input type="text" name="text" id="passwordText" maxlength="1024" placeholder="Digite sua senha" />
+                    <br />
+                    <input type="button" value=" Aleatória " onclick="document.key.text.value = randomPassword(8);" />
+                    <input type="button" value=" Limpar " onclick="document.key.text.value = '';" />
+                    <input type="button" value=" Selecionar " onclick="document.key.text.select();" />
+                </p>
+            </form>
+
+            <form name="plain" action="#" onsubmit="return false;">
+                <h3>Cole o texto aqui</h3>
+                <p align="center">
+                    <textarea name="text" id="plainText" rows="10" placeholder="Digite ou cole o texto a ser criptografado"></textarea>
+                    <br />
+                    <input type="button" name="encrypt" value=" Encrypt " onclick="encryptFormText();" />
+                    <input type="button" value=" Limpar " onclick="document.plain.text.value = '';" />
+                    <input type="button" value=" Selecionar " onclick="document.plain.text.select();" />
+                </p>
+            </form>
+
+            <form name="cipher" action="#" onsubmit="return false;">
+                <h3>Texto Criptografado</h3>
+                <p align="center">
+                    <textarea name="text" id="cipherText" rows="10" placeholder="Texto criptografado aparecerá aqui"></textarea>
+                    <br />
+                    <input type="button" name="decrypt" value=" Decrypt " onclick="decryptFormText();" />
+                    <input type="button" value=" Limpar " onclick="document.cipher.text.value = '';" />
+                    <input type="button" value=" Selecionar " onclick="document.cipher.text.select();" />
+                </p>
+            </form>
+
+            <h3>Código HTML gerado</h3>
+            <form name="encryptedCode" action="#" onsubmit="return false;">
+                <p align="center">
+                    <textarea name="text" id="codeText" rows="10" wrap="off" readonly="" onclick="this.focus(); this.select();"></textarea>
+                    <br />
+                    <input type="radio" name="codeType" value="hide" checked onclick="genSampleCode();"> Standard
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="radio" name="codeType" value="show" onclick="genSampleCode();"> Inline
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="radio" name="codeType" value="custom" onclick="genSampleCode();"> Custom
+                </p>
+            </form>
+
+            <h3>Texto HTML</h3>
+            <div id="encryptedTest">&nbsp;</div>
+            <p align="center">
+                <input type="button" value="Descriptografar Conteúdo HTML" onclick="openDecryptPopup();" />
+            </p>
+        </div>
+        <div class="clear"></div>
+
+        <div id="footer">
+            Copyright &copy; 2023 <a href="/">Seu Nome | Backup</a>
+        </div>
+    </div>
+
+    <!-- Pop-up Modal -->
+    <div id="decryptModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDecryptPopup()">&times;</span>
+            <h3>Descriptografar Conteúdo</h3>
+            <p>Digite a senha:</p>
+            <input type="password" id="popupPassword" placeholder="Senha" />
+            <p><strong>Conteúdo Descriptografado:</strong></p>
+            <div id="decryptedContent" style="border: 1px solid #ccc; padding: 10px; min-height: 50px;"></div>
+            <br />
+            <input type="button" value="Descriptografar" onclick="decryptPopupContent();" />
+        </div>
+    </div>
+
+    <script>
+        // Função para gerar senha aleatória
+        function randomPassword(length) {
+            const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let result = "";
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // Função para criptografar texto (exemplo básico)
+        function encryptFormText() {
+            const password = document.getElementById("passwordText").value;
+            const plainText = document.getElementById("plainText").value;
+            if (!password || !plainText) {
+                alert("Por favor, insira uma senha e um texto.");
+                return;
+            }
+            const encrypted = btoa(plainText); // Base64 encoding
+            document.getElementById("cipherText").value = encrypted;
+            genSampleCode(); // Atualiza o código HTML gerado
+        }
+
+        // Função para descriptografar texto (exemplo básico)
+        function decryptFormText() {
+            const password = document.getElementById("passwordText").value;
+            const cipherText = document.getElementById("cipherText").value;
+            if (!password || !cipherText) {
+                alert("Por favor, insira uma senha e um texto criptografado.");
+                return;
+            }
+            try {
+                const decrypted = atob(cipherText); // Base64 decoding
+                document.getElementById("plainText").value = decrypted;
+            } catch (e) {
+                alert("Erro ao descriptografar o texto.");
+            }
+        }
+
+        // Função para gerar código HTML (exemplo básico)
+        function genSampleCode() {
+            const codeType = document.querySelector('input[name="codeType"]:checked').value;
+            const cipherText = document.getElementById("cipherText").value;
+            let code = "";
+            if (codeType === "hide") {
+                code = `<div style="display:none;">${cipherText}</div>`;
+            } else if (codeType === "show") {
+                code = `<div>${cipherText}</div>`;
+            } else if (codeType === "custom") {
+                code = `<div class="custom-html">${cipherText}</div>`;
+            }
+            document.getElementById("codeText").value = code;
+            document.getElementById("encryptedTest").innerHTML = code; // Exibe o HTML gerado
+        }
+
+        // Função para abrir o pop-up
+        function openDecryptPopup() {
+            document.getElementById("decryptModal").style.display = "block";
+        }
+
+        // Função para fechar o pop-up
+        function closeDecryptPopup() {
+            document.getElementById("decryptModal").style.display = "none";
+            document.getElementById("popupPassword").value = "";
+            document.getElementById("decryptedContent").innerText = "";
+        }
+
+        // Função para descriptografar o conteúdo no pop-up
+        function decryptPopupContent() {
+            const popupPassword = document.getElementById("popupPassword").value;
+            const encryptedContent = document.querySelector("#encryptedTest div").innerText;
+            if (!popupPassword || !encryptedContent) {
+                alert("Por favor, insira uma senha e certifique-se de que há conteúdo criptografado no Texto HTML.");
+                return;
+            }
+            try {
+                const decrypted = atob(encryptedContent); // Base64 decoding
+                document.getElementById("decryptedContent").innerText = decrypted;
+            } catch (e) {
+                alert("Erro ao descriptografar o conteúdo HTML.");
+            }
+        }
+    </script>
+</body>
+</html>
